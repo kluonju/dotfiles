@@ -1,6 +1,7 @@
 # [alrra][repo]’s dotfiles
 
 [![CI status for macOS][ci badge macos]][ci link macos]
+[![CI status for Ubuntu][ci badge ubuntu]][ci link ubuntu]
 
 These are the base dotfiles that I start with when I set up
 a new environment (for more specific local needs I use the
@@ -32,6 +33,7 @@ To set up the dotfiles run the appropriate snippet in the terminal:
 | OS | Snippet |
 | :--- | :--- |
 | macOS | `bash -c "$(curl -LsS https://raw.githubusercontent.com/alrra/dotfiles/main/src/os/setup.sh)"` |
+| Ubuntu 26.04+ | `bash -c "$(curl -LsS https://raw.githubusercontent.com/alrra/dotfiles/ubuntu/src/os/setup.sh)"` |
 
 That's it! ✨
 
@@ -40,8 +42,10 @@ The setup process will:
 * Download the dotfiles on your computer (by default it will suggest
   `~/projects/dotfiles`).
 * [Symlink][symlink] the [Git], [shell], [tmux], and [Vim] related files.
-* Install applications / command-line tools for [macOS][install macos].
-* Set custom [macOS][preferences macos].
+* Install applications / command-line tools for [macOS][install macos]
+  or [Ubuntu][install ubuntu].
+* Set custom [macOS][preferences macos] or [Ubuntu][preferences ubuntu]
+  preferences.
 * Install the [Vim][vim plugins] and
   [VSCodium][VSCodium plugins] plugins.
 
@@ -175,14 +179,18 @@ The code is available under the [MIT license][license].
 <!-- Link labels: -->
 
 [ci badge macos]: https://github.com/alrra/dotfiles/workflows/macOS/badge.svg
+[ci badge ubuntu]: https://github.com/alrra/dotfiles/workflows/Ubuntu/badge.svg
 [ci link macos]: https://github.com/alrra/dotfiles/actions?query=workflow%3AmacOS
+[ci link ubuntu]: https://github.com/alrra/dotfiles/actions?query=workflow%3AUbuntu
 [fork]: https://help.github.com/en/github/getting-started-with-github/fork-a-repo
 [git log macos]: https://user-images.githubusercontent.com/1223565/101947422-519fc580-3ba5-11eb-90bc-1438072a45e1.png
 [git output macos]: https://user-images.githubusercontent.com/1223565/101947419-51072f00-3ba5-11eb-9e8e-fea987ac97c2.png
 [Git]: src/git
 [install macos]: src/os/installs/macos
+[install ubuntu]: src/os/installs/ubuntu
 [license]: LICENSE.txt
 [preferences macos]: src/os/preferences/macos
+[preferences ubuntu]: src/os/preferences/ubuntu
 [repo]: https://github.com/alrra
 [setup script]: https://github.com/alrra/dotfiles/blob/main/src/os/setup.sh#L3
 [setup]: src/os/setup.sh

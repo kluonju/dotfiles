@@ -1,0 +1,27 @@
+#!/bin/bash
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+# Set LS_COLORS (Linux / GNU coreutils).
+#
+#  * `ls` displays colors if the `--color=auto` option is passed or if
+#    the `CLICOLOR` environment variable is set.
+#
+#  * The actual colors are configured through `LS_COLORS` and sourced
+#    from `dircolors` (built-in defaults are used if not set).
+
+if [ -r "$HOME/.dircolors" ] && command -v dircolors &> /dev/null; then
+    eval "$(dircolors --sh "$HOME/.dircolors")"
+elif [ -r /etc/DIR_COLORS ] && command -v dircolors &> /dev/null; then
+    eval "$(dircolors --sh /etc/DIR_COLORS)"
+elif command -v dircolors &> /dev/null; then
+    eval "$(dircolors --sh)"
+fi
+
+export LS_COLORS
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+# Enable color support.
+
+alias ls="ls --color=auto"

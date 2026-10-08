@@ -47,9 +47,15 @@ export HISTSIZE=10000
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 # Prefer US English and use UTF-8 encoding.
+# Generate this locale on Ubuntu if missing: `sudo locale-gen en_US.UTF-8`.
 
-export LANG="en_US.UTF-8"
-export LC_ALL="en_US.UTF-8"
+if [ "$(get_os)" = "ubuntu" ] && ! locale -a 2>/dev/null | grep -q "en_US.utf8"; then
+    export LANG="C.UTF-8"
+    export LC_ALL="C.UTF-8"
+else
+    export LANG="en_US.UTF-8"
+    export LC_ALL="en_US.UTF-8"
+fi
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -103,8 +109,11 @@ fi
 #    bash: update_terminal_cwd: command not found
 #
 # error every time the prompt is displayed.
+#
+# On Linux `update_terminal_cwd` is not added at all.
 
-if  printf "%s" "$PROMPT_COMMAND" | grep "update_terminal_cwd" &> /dev/null &&
+if [ "$(get_os)" = "macos" ] && \
+    printf "%s" "$PROMPT_COMMAND" | grep "update_terminal_cwd" &> /dev/null &&
     ! command -v update_terminal_cwd &> /dev/null; then
     export PROMPT_COMMAND="$(printf "%s" "$PROMPT_COMMAND" | sed 's/\(.*\)update_terminal_cwd;*\(.*\)/\1\2/g')"
 fi

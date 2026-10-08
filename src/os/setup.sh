@@ -141,14 +141,15 @@ extract() {
 
 verify_os() {
     local -r MINIMUM_MACOS_VERSION="26.0"
+    local -r MINIMUM_UBUNTU_VERSION="26.04"
 
     local os_name="$(get_os)"
     local os_version="$(get_os_version)"
 
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-    # Check if the OS is `macOS` and
-    # it's above the required version.
+    # Check if the OS is one of the supported ones
+    # and it's above the required version.
 
     if [ "$os_name" = "macos" ]; then
 
@@ -158,10 +159,18 @@ verify_os() {
             printf "Sorry, this script is intended only for macOS %s+" "$MINIMUM_MACOS_VERSION"
         fi
 
+    elif [ "$os_name" = "ubuntu" ]; then
+
+        if is_supported_version "$os_version" "$MINIMUM_UBUNTU_VERSION"; then
+            return 0
+        else
+            printf "Sorry, this script is intended only for Ubuntu %s+" "$MINIMUM_UBUNTU_VERSION"
+        fi
+
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
     else
-        printf "Sorry, this script is intended only for macOS!"
+        printf "Sorry, this script is intended only for macOS or Ubuntu!"
     fi
 
     return 1
