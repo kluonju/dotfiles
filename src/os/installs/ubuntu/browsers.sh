@@ -12,15 +12,10 @@ print_in_purple "\n   Browsers\n"
 
 printf "\n"
 
-# Chromium on Ubuntu is most easily installed via `snap`, which Ubuntu
-# ships pre-installed (and which is what `snapd` does not yet need).
+# Use apt directly — no snap. On Ubuntu the `chromium-browser` deb
+# package pulls in the same Chromium release that the snap would, just
+# without the snapd dependency.
 
-if cmd_exists "snap"; then
-    execute \
-        "sudo snap install chromium" \
-        "Chromium"
-else
-    apt_install "Chromium" "chromium-browser" "--skip-update"
-fi
+apt_install "Chromium" "chromium-browser" "--skip-update"
 
 apt_install "Firefox" "firefox" "--skip-update"

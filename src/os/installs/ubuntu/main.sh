@@ -27,5 +27,4 @@ reload_local_shell_configs
 ./tmux.sh
 ./video_tools.sh
 ./../vim.sh
-./editors.sh
 ./shell_tools.sh
