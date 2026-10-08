@@ -1,126 +1,72 @@
-# [alrra][repo]’s dotfiles
+# Dotfiles
 
-[![CI status for macOS][ci badge macos]][ci link macos]
-[![CI status for Ubuntu][ci badge ubuntu]][ci link ubuntu]
-
-These are the base dotfiles that I start with when I set up
-a new environment (for more specific local needs I use the
-[`*.local`](#local-settings) files).
+Base dotfiles for Ubuntu 26.04+. For local settings that shouldn't
+live under version control, drop them in the `*.local` files
+documented under [Customize](#customize).
 
 ## Table of Contents
 
 * [🔧 Setup](#setup)
-* [📸 Screenshots](#screenshots)
-  * [🔁 Git](#git)
-  * [⌨️  Vim](#vim)
 * [💄 Customize](#customize)
-  * [🔀 Forks](#forks)
-  * [🌐 Local Settings](#local-settings)
-    * [🐚 `~/.bash.local`](#bashlocal)
-    * [🔁 `~/.gitconfig.local`](#gitconfiglocal)
-    * [⌨️  `~/.vimrc.local`](#vimrclocal)
+  * [🐚 `~/.bash.local`](#bashlocal)
+  * [🔁 `~/.gitconfig.local`](#gitconfiglocal)
+  * [⌨️  `~/.vimrc.local`](#vimrclocal)
 * [↕️  Update](#update)
 * [📑 License](#license)
 
 ## Setup
 
-To set up the dotfiles run the appropriate snippet in the terminal:
+Run the setup script from a local checkout:
+
+```bash
+git clone git@github.com:kluonju/dotfiles.git ~/projects/dotfiles
+cd ~/projects/dotfiles/src/os
+./setup.sh
+```
+
+Pass `-y` to skip the interactive prompts:
+
+```bash
+./setup.sh -y
+```
 
 > [!CAUTION]
 > __DO NOT__ run the setup script if you do not fully understand
 > [what it does][setup]. Seriously, __DON'T__!
 
-| OS | Snippet |
-| :--- | :--- |
-| macOS | `bash -c "$(curl -LsS https://raw.githubusercontent.com/alrra/dotfiles/main/src/os/setup.sh)"` |
-| Ubuntu 26.04+ | `bash -c "$(curl -LsS https://raw.githubusercontent.com/alrra/dotfiles/ubuntu/src/os/setup.sh)"` |
-
-That's it! ✨
-
 The setup process will:
 
-* Download the dotfiles on your computer (by default it will suggest
-  `~/projects/dotfiles`).
-* [Symlink][symlink] the [Git], [shell], [tmux], and [Vim] related files.
-* Install applications / command-line tools for [macOS][install macos]
-  or [Ubuntu][install ubuntu].
-* Set custom [macOS][preferences macos] or [Ubuntu][preferences ubuntu]
-  preferences.
-* Install the [Vim][vim plugins] and
-  [VSCodium][VSCodium plugins] plugins.
-
-Setup process in action:
-
-<!-- markdownlint-disable MD033 -->
-| <video src="https://user-images.githubusercontent.com/1223565/236653425-5beae04a-39e3-4f29-8113-009e402818e6.mp4" title="Setup process on macOS"/> |
-| :---: |
-<!-- markdownlint-enable MD033 -->
-
-## Screenshots
-
-### Git
-
-Output for `git status`:
-
-| ![Output for Git status on macOS][git output macos] |
-| :---: |
-| macOS |
-
-Output for `git log`:
-
-| ![Output for Git log on macOS][git log macos] |
-| :---: |
-| macOS |
-
-### Vim
-
-| ![Vim on macOS][vim macos] |
-| :---: |
-| macOS |
+* [Symlink][symlink] the [Git], [shell], [tmux], and [Vim] files into `~/`.
+* Create `~/.bash.local`, `~/.gitconfig.local`, `~/.vimrc.local` if missing.
+* Install applications and command-line tools for [Ubuntu][install ubuntu].
+* Set [Ubuntu preferences][preferences ubuntu] (GNOME `gsettings`).
+* Install the [Vim plugins][vim plugins].
 
 ## Customize
 
-### Local Settings
+The dotfiles can be extended for local needs via these files (loaded
+after the version-controlled ones, so they can override or extend):
 
-The dotfiles can be easily extended to suit additional local
-requirements by using the following files:
+### `~/.bash.local`
 
-#### `~/.bash.local`
+Automatically sourced after the other [Bash related files][shell]. Use
+it for `PATH` additions, local aliases, environment variables, etc.
 
-The `~/.bash.local` file will be automatically sourced after all
-the other [Bash related files][shell], thus, allowing its content
-to add to or overwrite the existing aliases, settings, `PATH`, etc.
-
-Here is an example:
-
-```shell
+```bash
 #!/bin/bash
 
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-# Set PATH additions.
-
-PATH="/Users/alrra/projects/dotfiles/src/bin/:$PATH"
-
+PATH="$HOME/projects/dotfiles/src/bin/:$PATH"
 export PATH
-
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-# Set local aliases.
 
 alias g="git"
 ```
 
-#### `~/.gitconfig.local`
+### `~/.gitconfig.local`
 
-The `~/.gitconfig.local` file will be automatically included after
-the configurations from `~/.gitconfig`, thus, allowing its content
-to overwrite or add to the existing Git configurations.
+Automatically included after `~/.gitconfig`. Use it for sensitive
+information such as Git user credentials:
 
-__Note:__ Use `~/.gitconfig.local` to store sensitive information
-such as the Git user credentials, e.g.:
-
-```gitconfig
+```ini
 [commit]
     gpgsign = true
 
@@ -136,13 +82,10 @@ such as the Git user credentials, e.g.:
     signingkey = "..."
 ```
 
-#### `~/.vimrc.local`
+### `~/.vimrc.local`
 
-The `~/.vimrc.local` file will be automatically sourced after
-`~/.vimrc`, thus, allowing its content to add or overwrite the
-settings from `~/.vimrc`.
-
-Here is an example:
+Automatically sourced after `~/.vimrc`. Use it to override or extend
+the Vim settings:
 
 ```vim
 " Disable arrow keys in insert mode.
@@ -151,26 +94,12 @@ inoremap <Down>  <ESC>:echoe "Use j"<CR>
 inoremap <Left>  <ESC>:echoe "Use h"<CR>
 inoremap <Right> <ESC>:echoe "Use l"<CR>
 inoremap <Up>    <ESC>:echoe "Use k"<CR>
-
-" Disable arrow keys in normal mode.
-
-nnoremap <Down>  :echoe "Use j"<CR>
-nnoremap <Left>  :echoe "Use h"<CR>
-nnoremap <Right> :echoe "Use l"<CR>
-nnoremap <Up>    :echoe "Use k"<CR>
 ```
-
-### Forks
-
-If you decide to [fork] this project, do not forget to substitute
-my username with your own in the [setup snippets](#setup) and [in
-the setup script][setup script].
 
 ## Update
 
-To update the dotfiles you can either run the [setup script][setup]
-or, if you want to update one particular part, run the appropriate
-[os script](src/os).
+Re-run the [setup script][setup] any time you change a file. It
+re-creates the symlinks and skips already-installed packages.
 
 ## License
 
@@ -178,26 +107,13 @@ The code is available under the [MIT license][license].
 
 <!-- Link labels: -->
 
-[ci badge macos]: https://github.com/alrra/dotfiles/workflows/macOS/badge.svg
-[ci badge ubuntu]: https://github.com/alrra/dotfiles/workflows/Ubuntu/badge.svg
-[ci link macos]: https://github.com/alrra/dotfiles/actions?query=workflow%3AmacOS
-[ci link ubuntu]: https://github.com/alrra/dotfiles/actions?query=workflow%3AUbuntu
-[fork]: https://help.github.com/en/github/getting-started-with-github/fork-a-repo
-[git log macos]: https://user-images.githubusercontent.com/1223565/101947422-519fc580-3ba5-11eb-90bc-1438072a45e1.png
-[git output macos]: https://user-images.githubusercontent.com/1223565/101947419-51072f00-3ba5-11eb-9e8e-fea987ac97c2.png
 [Git]: src/git
-[install macos]: src/os/installs/macos
-[install ubuntu]: src/os/installs/ubuntu
+[install ubuntu]: src/os/installs
 [license]: LICENSE.txt
-[preferences macos]: src/os/preferences/macos
-[preferences ubuntu]: src/os/preferences/ubuntu
-[repo]: https://github.com/alrra
-[setup script]: https://github.com/alrra/dotfiles/blob/main/src/os/setup.sh#L3
+[preferences ubuntu]: src/os/preferences
 [setup]: src/os/setup.sh
 [shell]: src/shell
 [symlink]: src/os/create_symbolic_links.sh
 [tmux]: src/tmux
-[vim macos]: https://user-images.githubusercontent.com/1223565/101947425-52385c00-3ba5-11eb-9a2a-13e7910d3673.png
 [vim plugins]: src/vim/vim/pack/minpac/start
 [Vim]: src/vim
-[vscodium plugins]: src/os/installs/macos/vscodium.sh

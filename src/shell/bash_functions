@@ -165,12 +165,7 @@ rename-media-files() (
         #   * IMG_1234.PNG => 2020-05-05 05.05.05.png
 
         if [[ "$fileName" =~ ^img_[0-9]+ ]]; then
-            if [ "$(uname -s)" = "Darwin" ]; then
-                newFileName="$(stat -f %SB -t "%Y-%m-%d %H.%M.%S" "$1")"
-            else
-                newFileName="$(stat --format='%y' "$1" | cut -d. -f1 | sed 's/:/-/g; s/[-:]/./3g')"
-                newFileName="$(date -d "$(stat --format='%y' "$1")" "+%Y-%m-%d %H.%M.%S")"
-            fi
+            newFileName="$(date -d "$(stat --format='%y' "$1")" "+%Y-%m-%d %H.%M.%S")"
 
             # Handle the cases where multiple files have the same
             # creation date.

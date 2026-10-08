@@ -10,6 +10,7 @@ source_bash_files() {
 
         "bash_aliases"
         "bash_autocompletion"
+        "bash_colors"
         "bash_exports"
         "bash_functions"
         "bash_options"
@@ -25,12 +26,7 @@ source_bash_files() {
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
     cd "$(dirname "$(readlink "${BASH_SOURCE[0]}")")" \
-        && . "../os/utils.sh"
-
-    # shellcheck disable=SC2034
-    local -r OS="$(get_os)"
-
-    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+        || return 1
 
     for i in ${!FILES_TO_SOURCE[*]}; do
 

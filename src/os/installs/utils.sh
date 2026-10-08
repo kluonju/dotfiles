@@ -33,27 +33,3 @@ apt_install() {
         "sudo DEBIAN_FRONTEND=noninteractive apt-get install --yes --no-install-recommends $PACKAGES" \
         "$LABEL"
 }
-
-# Print the path to an apt-installed binary (for setup steps that need
-# `prefix`-style lookups; not used currently, kept for parity with
-# `brew_prefix`).
-
-apt_prefix() {
-    printf "/usr"
-}
-
-# Refresh the apt index without installing anything.
-
-apt_update() {
-    execute \
-        "sudo apt-get update -y" \
-        "Update package index"
-}
-
-# Upgrade everything that's already installed.
-
-apt_upgrade() {
-    execute \
-        "sudo DEBIAN_FRONTEND=noninteractive apt-get upgrade --yes" \
-        "Upgrade packages"
-}

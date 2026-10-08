@@ -1,35 +1,19 @@
 #!/bin/bash
 
 cd "$(dirname "${BASH_SOURCE[0]}")" \
-    && . "../utils.sh"
+    && . "../../utils.sh" \
+    && . "./utils.sh"
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-install_plugins() {
-    local -r VIM_PACK_DIR="$HOME/.vim/pack"
-    local -r MINPAC_DIR="$VIM_PACK_DIR/minpac/opt/minpac"
-    local -r MINPAC_GIT_REPO_URL="https://github.com/k-takata/minpac.git"
+print_in_purple "\n   Vim\n\n"
 
-    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# `vim` ships with Ubuntu, but minimal builds drop features
+# (`+clipboard`, `+python3`). Install the fuller `vim-gtk3` build which
+# has clipboard + GUI libs, falling back to `vim-nox` for headless.
 
-    # Install plugins.
-
-    execute \
-        "rm -rf $VIM_PACK_DIR \
-            && git clone --quiet $MINPAC_GIT_REPO_URL $MINPAC_DIR" \
-        "Install plugins" \
-        || return 1
-
-    vim +PluginsSetup
-}
-
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-main() {
-    print_in_purple "\n   Vim\n\n"
-
-    "./$(get_os)/vim.sh"
-    install_plugins
-}
-
-main
+if apt-cache show vim-gtk3 &> /dev/null; then
+    apt_install "Vim" "vim-gtk3" "--skip-update"
+else
+    apt_install "Vim" "vim-nox" "--skip-update"
+fi

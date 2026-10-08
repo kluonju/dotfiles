@@ -40,14 +40,12 @@ cmd_exists() {
     command -v "$1" &> /dev/null
 }
 
-# Print a command that copies stdin to the OS clipboard.
-# macOS  -> `pbcopy`
-# Linux  -> `xclip -selection clipboard` (X11) or `wl-copy` (Wayland)
+# Print a command that copies stdin to the clipboard.
+# Wayland:  `wl-copy`
+# X11:      `xclip -selection clipboard`
 
 clipboard_copy_cmd() {
-    if cmd_exists "pbcopy"; then
-        printf "pbcopy"
-    elif cmd_exists "wl-copy"; then
+    if cmd_exists "wl-copy"; then
         printf "wl-copy"
     elif cmd_exists "xclip"; then
         printf "xclip -selection clipboard"
@@ -57,13 +55,10 @@ clipboard_copy_cmd() {
 }
 
 # Print a command that opens URLs/files in the OS default handler.
-# macOS -> `open`, Linux -> `xdg-open`.
 
 open_cmd() {
     if cmd_exists "xdg-open"; then
         printf "xdg-open"
-    elif cmd_exists "open"; then
-        printf "open"
     else
         return 1
     fi
@@ -138,45 +133,6 @@ execute() {
 
 get_answer() {
     printf "%s" "$REPLY"
-}
-
-get_os() {
-    local os=""
-    local kernelName=""
-
-    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-    kernelName="$(uname -s)"
-
-    if [ "$kernelName" = "Darwin" ]; then
-        os="macos"
-    elif [ "$kernelName" = "Linux" ] && [ -f /etc/os-release ] && \
-         . /etc/os-release && [ "${ID:-}" = "ubuntu" ]; then
-        os="ubuntu"
-    else
-        os="$kernelName"
-    fi
-
-    printf "%s" "$os"
-}
-
-get_os_version() {
-    local os=""
-    local version=""
-
-    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-    os="$(get_os)"
-
-    if [ "$os" = "macos" ]; then
-        version="$(sw_vers -productVersion)"
-    elif [ "$os" = "ubuntu" ] && [ -r /etc/os-release ]; then
-        # shellcheck disable=SC1091
-        . /etc/os-release
-        version="${VERSION_ID:-}"
-    fi
-
-    printf "%s" "$version"
 }
 
 is_git_repository() {

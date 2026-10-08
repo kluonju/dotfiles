@@ -2,13 +2,12 @@
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-# Set LS_COLORS (Linux / GNU coreutils).
+# Set LS_COLORS (GNU coreutils / Linux).
 #
-#  * `ls` displays colors if the `--color=auto` option is passed or if
-#    the `CLICOLOR` environment variable is set.
+#  * `ls` displays colors if the `--color=auto` option is passed.
 #
-#  * The actual colors are configured through `LS_COLORS` and sourced
-#    from `dircolors` (built-in defaults are used if not set).
+#  * The actual colors come from `LS_COLORS`, populated by
+#    `dircolors` (built-in defaults are used if no input is given).
 
 if [ -r "$HOME/.dircolors" ] && command -v dircolors &> /dev/null; then
     eval "$(dircolors --sh "$HOME/.dircolors")"

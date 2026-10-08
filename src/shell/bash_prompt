@@ -9,9 +9,12 @@ enable_color_support() {
 
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-    # Load OS specific color support.
+    # Load color support (loaded separately so `ls` colors are
+    # available even when no prompt is shown).
 
-    . "$OS/bash_colors"
+    if [ -r "$HOME/.bash_colors" ]; then
+        . "$HOME/.bash_colors"
+    fi
 }
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

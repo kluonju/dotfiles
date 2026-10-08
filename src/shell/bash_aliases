@@ -33,10 +33,28 @@ alias p="cd ~/projects"
 alias path='printf "%b\n" "${PATH//:/\\n}"'
 alias q="exit"
 alias t="tmux"
-alias y="yarn"
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-# Load OS specific configs.
+# Shorter commands for `apt`.
 
-. "$OS/bash_aliases"
+alias ai="sudo apt-get install"
+alias au="sudo apt-get update \
+            && sudo apt-get -y upgrade \
+            && sudo apt-get -y autoremove \
+            && sudo apt-get -y autoclean"
+alias as="apt-cache search"
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+# Clear DNS cache.
+
+alias clear-dns-cache="sudo systemd-resolve --flush-caches; \
+                       sudo systemctl restart nscd &> /dev/null \
+                       || sudo systemctl restart systemd-resolved"
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+# Open from the terminal.
+
+alias o="xdg-open"

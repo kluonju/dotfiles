@@ -1,15 +1,15 @@
 #!/bin/bash
 
-declare -r GITHUB_REPOSITORY="alrra/dotfiles"
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-declare -r DOTFILES_ORIGIN="git@github.com:$GITHUB_REPOSITORY.git"
-declare -r DOTFILES_TARBALL_URL="https://github.com/$GITHUB_REPOSITORY/tarball/main"
-declare -r DOTFILES_UTILS_URL="https://raw.githubusercontent.com/$GITHUB_REPOSITORY/main/src/os/utils.sh"
+declare skipQuestions=false
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-declare dotfilesDirectory="$HOME/projects/dotfiles"
-declare skipQuestions=false
+# Fetch `utils.sh` over the network when the script was downloaded
+# via curl (i.e., not from a local checkout).
+
+declare -r DOTFILES_UTILS_URL="https://raw.githubusercontent.com/kluonju/dotfiles/ubuntu/src/os/utils.sh"
 
 # ----------------------------------------------------------------------
 # | Helper Functions                                                   |
@@ -40,74 +40,6 @@ download() {
     return 1
 }
 
-download_dotfiles() {
-    local tmpFile=""
-
-    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-    print_in_purple "\n • Download and extract archive\n\n"
-
-    tmpFile="$(mktemp /tmp/XXXXX)"
-
-    download "$DOTFILES_TARBALL_URL" "$tmpFile"
-    print_result $? "Download archive" "true"
-    printf "\n"
-
-    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-    if ! $skipQuestions; then
-        ask_for_confirmation "Do you want to store the dotfiles in '$dotfilesDirectory'?"
-
-        if ! answer_is_yes; then
-            dotfilesDirectory=""
-            while [ -z "$dotfilesDirectory" ]; do
-                ask "Please specify another location for the dotfiles (path): "
-                dotfilesDirectory="$(get_answer)"
-            done
-        fi
-
-        # Ensure the `dotfiles` directory is available
-
-        while [ -e "$dotfilesDirectory" ]; do
-            ask_for_confirmation "'$dotfilesDirectory' already exists, do you want to overwrite it?"
-            if answer_is_yes; then
-                rm -rf "$dotfilesDirectory"
-                break
-            else
-                dotfilesDirectory=""
-                while [ -z "$dotfilesDirectory" ]; do
-                    ask "Please specify another location for the dotfiles (path): "
-                    dotfilesDirectory="$(get_answer)"
-                done
-            fi
-        done
-
-        printf "\n"
-    else
-        rm -rf "$dotfilesDirectory" &> /dev/null
-    fi
-
-    mkdir -p "$dotfilesDirectory"
-    print_result $? "Create '$dotfilesDirectory'" "true"
-
-    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-    # Extract archive in the `dotfiles` directory.
-
-    extract "$tmpFile" "$dotfilesDirectory"
-    print_result $? "Extract archive" "true"
-
-    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-    rm -rf "$tmpFile"
-    print_result $? "Remove archive"
-
-    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-    cd "$dotfilesDirectory/src/os" \
-        || return 1
-}
-
 download_utils() {
     local tmpFile=""
 
@@ -118,61 +50,36 @@ download_utils() {
         && rm -rf "$tmpFile" \
         && return 0
 
-   return 1
-}
-
-extract() {
-    local archive="$1"
-    local outputDir="$2"
-
-    if command -v "tar" &> /dev/null; then
-        tar \
-            --extract \
-            --gzip \
-            --file "$archive" \
-            --strip-components 1 \
-            --directory "$outputDir"
-
-        return $?
-    fi
-
     return 1
 }
 
 verify_os() {
-    local -r MINIMUM_MACOS_VERSION="26.0"
     local -r MINIMUM_UBUNTU_VERSION="26.04"
 
-    local os_name="$(get_os)"
-    local os_version="$(get_os_version)"
+    local os_version=""
 
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-    # Check if the OS is one of the supported ones
-    # and it's above the required version.
-
-    if [ "$os_name" = "macos" ]; then
-
-        if is_supported_version "$os_version" "$MINIMUM_MACOS_VERSION"; then
-            return 0
-        else
-            printf "Sorry, this script is intended only for macOS %s+" "$MINIMUM_MACOS_VERSION"
-        fi
-
-    elif [ "$os_name" = "ubuntu" ]; then
-
-        if is_supported_version "$os_version" "$MINIMUM_UBUNTU_VERSION"; then
-            return 0
-        else
-            printf "Sorry, this script is intended only for Ubuntu %s+" "$MINIMUM_UBUNTU_VERSION"
-        fi
-
-    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-    else
-        printf "Sorry, this script is intended only for macOS or Ubuntu!"
+    if ! [ -r /etc/os-release ]; then
+        printf "Sorry, this script is intended only for Ubuntu %s+" "$MINIMUM_UBUNTU_VERSION"
+        return 1
     fi
 
+    # shellcheck disable=SC1091
+    . /etc/os-release
+
+    if [ "${ID:-}" != "ubuntu" ]; then
+        printf "Sorry, this script is intended only for Ubuntu %s+" "$MINIMUM_UBUNTU_VERSION"
+        return 1
+    fi
+
+    os_version="${VERSION_ID:-}"
+
+    if is_supported_version "$os_version" "$MINIMUM_UBUNTU_VERSION"; then
+        return 0
+    fi
+
+    printf "Sorry, this script is intended only for Ubuntu %s+" "$MINIMUM_UBUNTU_VERSION"
     return 1
 }
 
@@ -216,15 +123,6 @@ main() {
 
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-    # Check if this script was run directly (./<path>/setup.sh),
-    # and if not, it most likely means that the dotfiles were not
-    # yet set up, and they will need to be downloaded.
-
-    printf "%s" "${BASH_SOURCE[0]}" | grep "setup.sh" &> /dev/null \
-        || download_dotfiles
-
-    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
     ./create_symbolic_links.sh "$@"
 
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -238,20 +136,6 @@ main() {
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
     ./preferences/main.sh
-
-    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-    if cmd_exists "git"; then
-        if [ "$(git config --get remote.origin.url)" != "$DOTFILES_ORIGIN" ]; then
-            ./initialize_git_repository.sh "$DOTFILES_ORIGIN"
-        fi
-
-        # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-        if ! $skipQuestions; then
-            ./update_content.sh
-        fi
-    fi
 
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 

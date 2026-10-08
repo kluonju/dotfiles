@@ -2,6 +2,9 @@
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-# Load OS specific configs.
+# Add commonly needed apt-managed locations (e.g. for things installed
+# outside of `/usr/bin`, like `pipx`, `volta`, manual installs) to PATH.
+# Most Ubuntu setup is handled by the install scripts that add entries
+# to `~/.bash.local`.
 
-. "$OS/bash_init"
+export PATH="$HOME/.local/bin:$PATH"

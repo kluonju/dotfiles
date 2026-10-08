@@ -8,9 +8,7 @@ cd "$(dirname "${BASH_SOURCE[0]}")" \
 
 print_in_purple "\n   Shell Tools\n\n"
 
-# Tools the dotfiles' shell scripts lean on. On macOS these are
-# typically installed via Homebrew (`reattach-to-user-namespace`, …)
-# so they were never installed explicitly there.
+# Tools the dotfiles' shell scripts lean on.
 
 apt_install "xclip" "xclip" "--skip-update"
 

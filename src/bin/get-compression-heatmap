@@ -91,22 +91,11 @@ get_image_name() {
 }
 
 get_script_path() {
-    local -r os_name="$(uname -s)"
     local path="$1"
 
-    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    # Ubuntu 26.04+ is always Linux x86_64.
 
-    if [ "$os_name" = "Darwin" ]; then
-        path="$path/macos"
-    elif [ "$os_name" = "Linux" ]; then
-        path="$path/linux"
-
-        if [ "$(uname -m)" = "x86_64" ]; then
-            path="${path}-64"
-        else
-            path="${path}-32"
-        fi
-    fi
+    path="$path/linux-64"
 
     printf "%s" "$(dirname "${BASH_SOURCE[0]}")/$path"
 }
@@ -188,8 +177,8 @@ main() {
 
         # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-        # Opening too many images really
-        # quickly makes macOS' Preview crash.
+        # A small pause between opening images avoids race
+        # conditions on the image viewer.
 
         sleep 0.2
 
