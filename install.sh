@@ -158,6 +158,7 @@ main() {
     ./tex.sh
     ./intel_oneapi.sh
     ./rust.sh
+    ./julia.sh
 
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
