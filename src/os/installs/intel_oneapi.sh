@@ -8,14 +8,16 @@ cd "$(dirname "${BASH_SOURCE[0]}")" \
 
 # Intel oneAPI toolkit locations.
 #
-# The current (2024+) Intel APT install instructions use:
+# The current (2026.1) Intel APT install instructions use:
 #
 #   https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB
 #   https://apt.repos.intel.com/oneapi all main
+#   apt install intel-oneapi-toolkit
 #
-# The earlier `oneapi-all/KEYS` endpoint now returns 403. If you
-# are behind a proxy, set `http_proxy` / `https_proxy` in your
-# environment so the `apt` client can reach the repo.
+# Earlier guides used split packages like `intel-oneapi-basekit` /
+# `intel-oneapi-hpckit`, or referenced an `oneapi-all` repo path
+# that now returns 403. Intel consolidated those into the single
+# `intel-oneapi-toolkit` meta-package on the `oneapi` repo.
 
 ONEAPI_REPO_URL="https://apt.repos.intel.com/oneapi"
 ONEAPI_KEY_URL="https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB"
@@ -24,9 +26,10 @@ ONEAPI_LIST="/etc/apt/sources.list.d/oneAPI.list"
 
 # Module system: environment-modules reads `$MODULEPATH`. We point it
 # at oneAPI's bundled modulefiles and register the init in `~/.bashrc`
-# so `module load …` works in interactive shells.
+# so `module load …` works in interactive shells. Intel also ships
+# split module trees at `basekit/latest/modulefiles` and
+# `hpckit/latest/modulefiles` for finer-grained `module load`.
 
-ONEAPI_MODULE_BASE="/opt/intel/oneapi/modulefiles"
 ONEAPI_BASHRC_INIT='
 # Load Intel oneAPI modules (added by dotfiles setup).
 if [ -f /usr/share/modules/init/bash ]; then
@@ -38,19 +41,35 @@ fi
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 add_apt_repo() {
-    # Skip if the repo file already exists *and* points at the
-    # current repo URL. The earlier `oneapi-all/KEYS` endpoint
-    # now returns 403; if a previous run created a list pointing
-    # at that (or any other) stale URL, replace it.
+    # Disable any stale Intel oneAPI source files. Older dotfiles
+    # versions created files under different names (e.g.
+    # `intel-oneapi.list`) pointing at the now-defunct
+    # `oneapi-all` URL, and apt fails the whole update if even
+    # one of them is broken. Move them aside so apt ignores them.
 
-    if [ -f "$ONEAPI_LIST" ] && grep -qE "^deb .* $ONEAPI_REPO_URL( |$)" "$ONEAPI_LIST"; then
-        print_success "oneAPI apt repository (already configured)"
-        return 0
+    local stale=0
+    local f=""
+
+    if [ -d /etc/apt/sources.list.d ]; then
+        for f in /etc/apt/sources.list.d/*; do
+            [ -f "$f" ] || continue
+            if grep -qE 'apt\.repos\.intel\.com/(oneapi|oneapi-all)' "$f" \
+                && ! grep -qE "^deb .* $ONEAPI_REPO_URL( |$)" "$f"; then
+                print_warning "Disabling stale Intel oneAPI list: $f"
+                sudo mv "$f" "$f.disabled"
+                stale=1
+            fi
+        done
     fi
 
-    if [ -f "$ONEAPI_LIST" ]; then
-        print_warning "Replacing stale oneAPI list at $ONEAPI_LIST"
-        sudo rm -f "$ONEAPI_LIST"
+    # Skip if the canonical list file already exists *and* points
+    # at the current repo URL.
+
+    if [ "$stale" -eq 0 ] \
+        && [ -f "$ONEAPI_LIST" ] \
+        && grep -qE "^deb .* $ONEAPI_REPO_URL( |$)" "$ONEAPI_LIST"; then
+        print_success "oneAPI apt repository (already configured)"
+        return 0
     fi
 
     # Fetch the signing key into the system keyring.
@@ -72,19 +91,13 @@ add_apt_repo() {
         "Update package index"
 }
 
-install_basekit() {
-    # Base Toolkit: compilers (icx/ifx), MKL, MPI, IPP, TBB, …
-    # ~4 GB on disk.
+install_toolkit() {
+    # Intel now ships a single `intel-oneapi-toolkit` meta-package
+    # containing both the Base and HPC kits. Earlier guides listed
+    # `intel-oneapi-basekit` / `intel-oneapi-hpckit` as separate
+    # packages; those names no longer exist on the `oneapi` repo.
 
-    apt_install "Intel oneAPI Base Toolkit" "intel-oneapi-basekit"
-}
-
-install_hpckit() {
-    # HPC Toolkit: classic Intel compilers (icc/ifort) and MPI
-    # variants, plus analysis tools. ~6 GB on disk. Comment this line
-    # out if you only need Base.
-
-    apt_install "Intel oneAPI HPC Toolkit" "intel-oneapi-hpckit"
+    apt_install "Intel oneAPI Toolkit" "intel-oneapi-toolkit"
 }
 
 install_module_system() {
@@ -111,11 +124,12 @@ main() {
     add_apt_repo
     install_module_system
 
-    # The two toolkits are separate apt packages. Each is a large
-    # download — comment out the one you don't want.
+    # The consolidated Intel oneAPI toolkit. ~10 GB on disk; comment
+    # out this line if you only need a small subset of the tools
+    # (you can install individual component packages, e.g.
+    # `intel-oneapi-compiler-dpcpp-cpp`, instead).
 
-    install_basekit
-    install_hpckit
+    install_toolkit
 
     register_module_init
 }

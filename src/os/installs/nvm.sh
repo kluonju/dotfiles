@@ -38,16 +38,20 @@ install_nvm() {
     # than `$HOME/.nvm`, and the follow-up `\. "$HOME/.nvm/nvm.sh"`
     # in `install_node` fails with "no such file or directory".
 
+    # Capture the installer's output so we can show it on failure
+    # — the `execute` helper discards stdout by default.
+
+    local -r NVM_LOG="$(mktemp /tmp/nvm-install.XXXXX.log)"
+
     execute \
         "NVM_DIR='$NVM_DIR' \
-            curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/$NVM_VERSION/install.sh \
-                | NVM_DIR='$NVM_DIR' bash" \
+            curl -fsSL https://raw.githubusercontent.com/nvm-sh/nvm/$NVM_VERSION/install.sh \
+                | NVM_DIR='$NVM_DIR' bash > '$NVM_LOG' 2>&1" \
         "Install nvm"
 
     # Sanity check: the installer should have created
-    # `$NVM_DIR/nvm.sh`. If not, something's off about the
-    # environment. Help the user find where it actually landed
-    # so they can clean up and retry.
+    # `$NVM_DIR/nvm.sh`. If not, surface the captured log so the
+    # user can see what the installer actually did.
 
     if [ ! -s "$NVM_DIR/nvm.sh" ]; then
         printf "\n%s\n" \
@@ -57,12 +61,19 @@ install_nvm() {
         printf "%s\n\n" \
             "nvm installed elsewhere. Re-run as the user who owns \$HOME."
         printf "%s\n" \
-            "Looking for an existing nvm install on disk:"
-        command find / -name 'nvm.sh' -path '*/.nvm/*' 2>/dev/null \
-            | head -n 5 \
+            "Installer output (truncated to last 20 lines):"
+        tail -n 20 "$NVM_LOG" 2>/dev/null | sed 's/^/  /'
+        printf "\n%s\n" \
+            "Searching for an existing nvm install on disk:"
+        command find / -name 'nvm.sh' 2>/dev/null \
+            | grep -v '/proc/' \
+            | head -n 10 \
             | sed 's/^/  /'
+        rm -f "$NVM_LOG"
         return 1
     fi
+
+    rm -f "$NVM_LOG"
 }
 
 install_node() {
