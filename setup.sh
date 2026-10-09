@@ -61,7 +61,8 @@ verify_os() {
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
     if ! [ -r /etc/os-release ]; then
-        printf "Sorry, this script is intended only for Ubuntu %s+" "$MINIMUM_UBUNTU_VERSION"
+        printf "Sorry, this script is intended only for Ubuntu %s+\n" \
+            "$MINIMUM_UBUNTU_VERSION"
         return 1
     fi
 
@@ -69,17 +70,30 @@ verify_os() {
     . /etc/os-release
 
     if [ "${ID:-}" != "ubuntu" ]; then
-        printf "Sorry, this script is intended only for Ubuntu %s+" "$MINIMUM_UBUNTU_VERSION"
+        printf "Sorry, this script is intended only for Ubuntu %s+\n" \
+            "$MINIMUM_UBUNTU_VERSION"
         return 1
     fi
 
     os_version="${VERSION_ID:-}"
 
+    # `is_supported_version` lives in `utils.sh`, which `main` is
+    # supposed to source before calling this function. If it's
+    # missing here, the source failed earlier — bail with an
+    # actionable error rather than letting bash emit a confusing
+    # "command not found" line.
+
+    if ! declare -F is_supported_version > /dev/null; then
+        printf "Internal error: utils.sh was not sourced. Aborting.\n" >&2
+        return 2
+    fi
+
     if is_supported_version "$os_version" "$MINIMUM_UBUNTU_VERSION"; then
         return 0
     fi
 
-    printf "Sorry, this script is intended only for Ubuntu %s+" "$MINIMUM_UBUNTU_VERSION"
+    printf "Sorry, this script is intended only for Ubuntu %s+\n" \
+        "$MINIMUM_UBUNTU_VERSION"
     return 1
 }
 
@@ -99,9 +113,26 @@ main() {
     # Load utils
 
     if [ -x "utils.sh" ]; then
-        . "utils.sh" || exit 1
+        . "utils.sh" || {
+            printf "Failed to source ./utils.sh\n" >&2
+            exit 1
+        }
     else
-        download_utils || exit 1
+        download_utils || {
+            printf "Failed to source utils.sh (no local copy and network fetch failed)\n" >&2
+            exit 1
+        }
+    fi
+
+    # `verify_os` (called below) depends on `is_supported_version`
+    # from utils.sh. If the source loaded something other than the
+    # expected utils.sh, fail here with a clear message instead of
+    # letting `verify_os` print a generic "command not found" line.
+
+    if ! declare -F is_supported_version > /dev/null; then
+        printf "Sourced utils.sh but is_supported_version is missing.\n" >&2
+        printf "Check that src/os/utils.sh defines it.\n" >&2
+        exit 1
     fi
 
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
