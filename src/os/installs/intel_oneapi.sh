@@ -1,14 +1,25 @@
 #!/bin/bash
 
 cd "$(dirname "${BASH_SOURCE[0]}")" \
-    && . "../utils.sh"
+    && . "../utils.sh" \
+    && . "./utils.sh"
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 # Intel oneAPI toolkit locations.
+#
+# The current (2024+) Intel APT install instructions use:
+#
+#   https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB
+#   https://apt.repos.intel.com/oneapi all main
+#
+# The earlier `oneapi-all/KEYS` endpoint now returns 403. If you
+# are behind a proxy, set `http_proxy` / `https_proxy` in your
+# environment so the `apt` client can reach the repo.
 
-ONEAPI_REPO_URL="https://apt.repos.intel.com/oneapi-all"
-ONEAPI_KEYRING="/usr/share/keyrings/intel-oneapi-archive-keyring.gpg"
+ONEAPI_REPO_URL="https://apt.repos.intel.com/oneapi"
+ONEAPI_KEY_URL="https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB"
+ONEAPI_KEYRING="/usr/share/keyrings/oneapi-archive-keyring.gpg"
 ONEAPI_LIST="/etc/apt/sources.list.d/oneAPI.list"
 
 # Module system: environment-modules reads `$MODULEPATH`. We point it
@@ -27,17 +38,25 @@ fi
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 add_apt_repo() {
-    # Skip if the repo file already exists.
+    # Skip if the repo file already exists *and* points at the
+    # current repo URL. The earlier `oneapi-all/KEYS` endpoint
+    # now returns 403; if a previous run created a list pointing
+    # at that (or any other) stale URL, replace it.
 
-    if [ -f "$ONEAPI_LIST" ]; then
+    if [ -f "$ONEAPI_LIST" ] && grep -qF "$ONEAPI_REPO_URL" "$ONEAPI_LIST"; then
         print_success "oneAPI apt repository (already configured)"
         return 0
+    fi
+
+    if [ -f "$ONEAPI_LIST" ]; then
+        print_warning "Replacing stale oneAPI list at $ONEAPI_LIST"
+        sudo rm -f "$ONEAPI_LIST"
     fi
 
     # Fetch the signing key into the system keyring.
 
     execute \
-        "curl -fsSL '$ONEAPI_REPO_URL/KEYS' \
+        "curl -fsSL '$ONEAPI_KEY_URL' \
             | sudo gpg --dearmor --yes --output '$ONEAPI_KEYRING'" \
         "Add oneAPI GPG key"
 
