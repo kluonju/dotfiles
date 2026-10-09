@@ -43,7 +43,7 @@ add_apt_repo() {
     # now returns 403; if a previous run created a list pointing
     # at that (or any other) stale URL, replace it.
 
-    if [ -f "$ONEAPI_LIST" ] && grep -qF "$ONEAPI_REPO_URL" "$ONEAPI_LIST"; then
+    if [ -f "$ONEAPI_LIST" ] && grep -qE "^deb .* $ONEAPI_REPO_URL( |$)" "$ONEAPI_LIST"; then
         print_success "oneAPI apt repository (already configured)"
         return 0
     fi

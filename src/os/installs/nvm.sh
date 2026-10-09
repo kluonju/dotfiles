@@ -19,22 +19,48 @@ install_nvm() {
         return 0
     fi
 
+    # If a previous run created $NVM_DIR but didn't finish writing
+    # nvm.sh (e.g. interrupted mid-install, or `$HOME` was wrong),
+    # the installer's `git fetch` against a broken tree can leave
+    # the directory in a half-installed state. Wipe it so the
+    # installer's "fresh clone" path is taken.
+
+    if [ -d "$NVM_DIR" ] && [ ! -s "$NVM_DIR/nvm.sh" ]; then
+        print_warning "Removing partial nvm install at $NVM_DIR"
+        rm -rf "$NVM_DIR"
+    fi
+
+    # Pin NVM_DIR in the installer subshell. Without this, the
+    # installer reads `NVM_DIR` from the inherited env (or, failing
+    # that, `$HOME/.nvm`). If a prior tool exported NVM_DIR to a
+    # different path — or if `$HOME` in the subshell differs from
+    # the user's actual home — nvm.sh ends up somewhere other
+    # than `$HOME/.nvm`, and the follow-up `\. "$HOME/.nvm/nvm.sh"`
+    # in `install_node` fails with "no such file or directory".
+
     execute \
-        "curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/$NVM_VERSION/install.sh | bash" \
+        "NVM_DIR='$NVM_DIR' \
+            curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/$NVM_VERSION/install.sh \
+                | NVM_DIR='$NVM_DIR' bash" \
         "Install nvm"
 
     # Sanity check: the installer should have created
     # `$NVM_DIR/nvm.sh`. If not, something's off about the
-    # environment (e.g. `$HOME` differs between this script and
-    # the curl|bash subshell).
+    # environment. Help the user find where it actually landed
+    # so they can clean up and retry.
 
     if [ ! -s "$NVM_DIR/nvm.sh" ]; then
-        printf "\n%s\n\n" \
+        printf "\n%s\n" \
             "nvm install reported success, but $NVM_DIR/nvm.sh is missing."
         printf "%s\n" \
             "If \$HOME was set to a different directory when this script ran,"
-        printf "%s\n" \
+        printf "%s\n\n" \
             "nvm installed elsewhere. Re-run as the user who owns \$HOME."
+        printf "%s\n" \
+            "Looking for an existing nvm install on disk:"
+        command find / -name 'nvm.sh' -path '*/.nvm/*' 2>/dev/null \
+            | head -n 5 \
+            | sed 's/^/  /'
         return 1
     fi
 }
