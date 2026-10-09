@@ -34,6 +34,26 @@ execute \
     "im-config -n fcitx5" \
     "Set Fcitx5 as default input method"
 
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+# CJK fonts (so Chinese characters render correctly in apps that
+# don't bundle their own fonts).
+
+# Noto CJK fonts (Google; covers all CJK characters).
+apt_install "Noto CJK"     "fonts-noto-cjk"       "--skip-update"
+apt_install "Noto CJK extra" "fonts-noto-cjk-extra" "--skip-update"
+
+# WenQuanYi fonts.
+apt_install "WenQuanYi Micro Hei" "fonts-wqy-microhei" "--skip-update"
+apt_install "WenQuanYi Zen Hei"   "fonts-wqy-zenhei"   "--skip-update"
+
+# Refresh the font cache so the new fonts are picked up
+# by fontconfig-aware apps without a logout.
+
+execute \
+    "fc-cache -fv" \
+    "Refresh font cache"
+
 # Rectangle (macOS window-tiling) has a near-equivalent in
 # `gnome-shell-extension-window-tiler` or, more commonly, the user
 # installs `tilingshell` from a third-party repo. Print a hint and move on.
