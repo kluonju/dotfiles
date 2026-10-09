@@ -16,14 +16,13 @@ ask_for_sudo
 reload_local_shell_configs
 ./bash.sh
 ./git.sh
-./volta.sh
+./nvm.sh
 ./browsers.sh
 ./compression_tools.sh
 ./gpg.sh
 ./image_tools.sh
 ./misc.sh
 ./misc_tools.sh
-./npm.sh
 ./tmux.sh
 ./video_tools.sh
 ./vim.sh
