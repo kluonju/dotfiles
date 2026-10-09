@@ -13,7 +13,9 @@
 .editorconfig export-ignore
 .gitattributes export-ignore
 .github export-ignore
+README.md export-ignore
 scripts export-ignore
+setup.sh export-ignore
 src/vim/vim/pack/* export-ignore
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

@@ -9,9 +9,11 @@
 cd "$(dirname "${BASH_SOURCE[0]}")/../.."
 
 find \
+    setup.sh \
     src/os \
     src/shell \
     scripts/**/*.sh \
+    src/bin/get-compression-heatmap \
     -type f \
     ! -path 'src/**/*.applescript' \
     ! -path 'src/**/*.terminal' \

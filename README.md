@@ -20,7 +20,7 @@ Run the setup script from a local checkout:
 
 ```bash
 git clone git@github.com:kluonju/dotfiles.git ~/projects/dotfiles
-cd ~/projects/dotfiles/src/os
+cd ~/projects/dotfiles
 ./setup.sh
 ```
 
@@ -111,7 +111,7 @@ The code is available under the [MIT license][license].
 [install ubuntu]: src/os/installs
 [license]: LICENSE.txt
 [preferences ubuntu]: src/os/preferences
-[setup]: src/os/setup.sh
+[setup]: setup.sh
 [shell]: src/shell
 [symlink]: src/os/create_symbolic_links.sh
 [tmux]: src/tmux

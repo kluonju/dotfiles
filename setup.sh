@@ -91,7 +91,7 @@ main() {
     # Ensure that the following actions
     # are made relative to this file's path.
 
-    cd "$(dirname "${BASH_SOURCE[0]}")" \
+    cd "$(dirname "${BASH_SOURCE[0]}")/src/os" \
         || exit 1
 
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
