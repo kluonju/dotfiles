@@ -162,7 +162,11 @@ main() {
 
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-    ./installs/main.sh
+    # Heavy installs (apt packages, nvm, rustup, oneAPI, TeX) are
+    # split out into `./install.sh` so that this script can finish
+    # in seconds. Run it separately when you want the packages:
+    #
+    #   ./install.sh
 
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
