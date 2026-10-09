@@ -21,6 +21,16 @@ apt_install "Blender"   "blender"   "--skip-update"
 apt_install "GIMP"      "gimp"      "--skip-update"
 apt_install "Inkscape"  "inkscape"  "--skip-update"
 
+# Hugo — static site generator.
+#
+# Ubuntu's `hugo` package is the standard (non-extended) build,
+# which is fine for most sites. If you need SCSS/Sass or WebP
+# support (the `+extended` build), comment this out and install
+# the latest official deb instead:
+#   https://github.com/gohugoio/hugo/releases/latest
+
+apt_install "Hugo" "hugo" "--skip-update"
+
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 # Chinese input method (Fcitx5 + Chinese addons).

@@ -8,6 +8,12 @@ cd "$(dirname "${BASH_SOURCE[0]}")" \
 NVM_VERSION="v0.40.8"
 NVM_DIR="$HOME/.nvm"
 
+# Tsinghua TUNA mirror for Node.js binary downloads (the default
+# nodejs.org is slow or blocked from mainland China). nvm reads
+# this env var at install time and propagates it to its child
+# processes.
+NVM_NODEJS_ORG_MIRROR="https://mirrors.tuna.tsinghua.edu.cn/nodejs-release/"
+
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 install_nvm() {
@@ -90,12 +96,16 @@ install_node() {
     #   # Verify npm version:
     #   npm -v # Should print "11.20.0".
     #
-    # The whole sequence is wrapped in a single `execute` so the
-    # shell state (the sourced `nvm.sh`) is preserved across the
-    # chained commands.
+    # `NVM_NODEJS_ORG_MIRROR` is exported into the subshell so the
+    # install fetches Node binaries from the Tsinghua TUNA mirror
+    # instead of nodejs.org (which is slow or blocked from
+    # mainland China). The whole sequence is wrapped in a single
+    # `execute` so the shell state (the sourced `nvm.sh`) is
+    # preserved across the chained commands.
 
     execute \
-        ". \"\$HOME/.nvm/nvm.sh\" \
+        "NVM_NODEJS_ORG_MIRROR='$NVM_NODEJS_ORG_MIRROR' \
+            . \"\$HOME/.nvm/nvm.sh\" \
             && nvm install 26 \
             && node -v \
             && npm -v" \

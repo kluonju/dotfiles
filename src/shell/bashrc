@@ -4,5 +4,12 @@
     && . "$HOME/.bash_profile"
 
 export NVM_DIR="$HOME/.nvm"
+
+# Use the Tsinghua TUNA mirror for Node.js binary downloads
+# (the default nodejs.org is slow or blocked from mainland
+# China). Set before sourcing nvm.sh so all `nvm install` /
+# `nvm use` calls in interactive shells pick it up.
+export NVM_NODEJS_ORG_MIRROR="https://mirrors.tuna.tsinghua.edu.cn/nodejs-release/"
+
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
