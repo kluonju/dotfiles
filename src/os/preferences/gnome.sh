@@ -41,3 +41,6 @@ gsettings_set "org.gnome.nautilus.preferences" "show-create-link"  "true"
 # Don't show image thumbnails for files larger than 100 MB.
 
 gsettings_set "org.gnome.nautilus.preferences" "thumbnail-limit" "104857600"
+
+# Enable primary paste. by default on 26.04, it is false.
+gsettings_set "org.gnome.desktop.interface" "gtk-enable-primary-paste" "true"

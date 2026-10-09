@@ -5,36 +5,58 @@ cd "$(dirname "${BASH_SOURCE[0]}")" \
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+NVM_VERSION="v0.40.8"
+NVM_DIR="$HOME/.nvm"
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
 install_nvm() {
+    # nvm's installer is idempotent — it skips an existing install.
+    # We use `command -v nvm` to detect an existing install (which
+    # only works in shells that have already sourced `nvm.sh`), but
+    # the more reliable check is whether the install directory
+    # exists.
+
+    if [ -s "$NVM_DIR/nvm.sh" ]; then
+        print_success "nvm (already installed)"
+        return 0
+    fi
+
     execute \
-        "curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.8/install.sh | bash" \
+        "curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/$NVM_VERSION/install.sh | bash" \
         "Install nvm"
+
+    if [ ! -s "$NVM_DIR/nvm.sh" ]; then
+        printf "\n%s\n\n" \
+            "nvm install reported success, but $NVM_DIR/nvm.sh is missing."
+        printf "%s\n" \
+            "If \$HOME was set to a different directory when this script ran,"
+        printf "%s\n" \
+            "nvm installed elsewhere. Re-run as the user who owns \$HOME."
+        return 1
+    fi
 }
 
 install_node() {
-    # Install Node.js 26 via nvm and set it as the default.
-    #
-    # Source `~/.nvm/nvm.sh` (added by the nvm installer to
-    # `~/.bashrc`) so nvm is available in this shell, then install
-    # Node 26 and alias it as the default.
+    # Source nvm in a fresh login shell (which loads `~/.bashrc`,
+    # where nvm's installer adds its own `[ -s "$NVM_DIR/nvm.sh" ]
+    # && \. …` line). Use `bash -lc` so `.bashrc` actually runs
+    # in non-interactive contexts.
 
     execute \
-        ". \"\$HOME/.nvm/nvm.sh\" \
-            && nvm install 26 \
-            && nvm alias default 26 \
-            && node -v" \
+        "bash -lc '\
+            nvm install 26 && \
+            nvm alias default 26 && \
+            node -v'" \
         "Install Node.js 26"
 }
 
 install_corepack() {
-    # `corepack` ships with Node.js 16+, but installing it explicitly
-    # with the npm we just installed makes it a no-op.
-
     execute \
-        ". \"\$HOME/.nvm/nvm.sh\" \
-            && npm install -g corepack \
-            && corepack enable pnpm \
-            && pnpm -v" \
+        "bash -lc '\
+            npm install -g corepack && \
+            corepack enable pnpm && \
+            pnpm -v'" \
         "Install corepack and enable pnpm"
 }
 
