@@ -28,3 +28,4 @@ reload_local_shell_configs
 ./video_tools.sh
 ./vim.sh
 ./shell_tools.sh
+./tex.sh
