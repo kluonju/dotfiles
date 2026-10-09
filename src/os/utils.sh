@@ -311,10 +311,36 @@ show_spinner() {
 
 update_local_shell_configs() {
     declare -r LOCAL_SHELL_CONFIG_FILE="$HOME/.bash.local"
+    local -r BLOCK="$1"
 
-    if ! grep "$1" < "$LOCAL_SHELL_CONFIG_FILE" &> /dev/null; then
+    # Use the first non-empty, non-pure-whitespace line of $BLOCK
+    # as the marker for the "already there" check. A bare
+    # `grep "$1"` does not work for multi-line input — grep reads
+    # line-by-line and only the first line is used as the pattern,
+    # so a leading newline in $1 would cause grep to match an
+    # empty pattern (always true), making the function never
+    # write.
+
+    local marker=""
+    local line=""
+
+    while IFS= read -r line; do
+        # Trim leading/trailing whitespace for the marker check.
+        line="${line#"${line%%[![:space:]]*}"}"
+        line="${line%"${line##*[![:space:]]}"}"
+        if [ -n "$line" ]; then
+            marker="$line"
+            break
+        fi
+    done <<< "$BLOCK"
+
+    if [ -z "$marker" ]; then
+        marker="$BLOCK"
+    fi
+
+    if ! grep -F -q -- "$marker" "$LOCAL_SHELL_CONFIG_FILE" 2> /dev/null; then
         execute \
-            "printf '%s\n' '$1' >> $LOCAL_SHELL_CONFIG_FILE" \
+            "printf '%s\n' \"\$BLOCK\" >> \"$LOCAL_SHELL_CONFIG_FILE\"" \
             "Update '$LOCAL_SHELL_CONFIG_FILE'"
     fi
 
