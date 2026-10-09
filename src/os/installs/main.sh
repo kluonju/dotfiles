@@ -28,3 +28,4 @@ reload_local_shell_configs
 ./vim.sh
 ./shell_tools.sh
 ./tex.sh
+./intel_oneapi.sh
