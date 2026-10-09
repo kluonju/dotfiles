@@ -8,11 +8,17 @@ cd "$(dirname "${BASH_SOURCE[0]}")" \
 NVM_VERSION="v0.40.8"
 NVM_DIR="$HOME/.nvm"
 
-# Tsinghua TUNA mirror for Node.js binary downloads (the default
-# nodejs.org is slow or blocked from mainland China). nvm reads
-# this env var at install time and propagates it to its child
-# processes.
-NVM_NODEJS_ORG_MIRROR="https://mirrors.tuna.tsinghua.edu.cn/nodejs-release/"
+# Domestic Chinese mirror for Node.js binary downloads. The
+# default nodejs.org is slow or blocked from mainland China, and
+# nvm reads this env var at install time and propagates it to
+# its child processes when running `nvm install <version>`.
+#
+# TUNA's `nodejs-release` mirror stopped at v24.x as of late
+# 2025 — it has no v25/v26 entries — so `nvm install 26` errors
+# with "Version '26' not found" against TUNA. Aliyun keeps up
+# with upstream (verified: v26.11.1 is the latest entry, with
+# every v26.x in between), so we use it instead.
+NVM_NODEJS_ORG_MIRROR="https://mirrors.aliyun.com/nodejs-release/"
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -97,9 +103,10 @@ install_node() {
     #   npm -v # Should print "11.20.0".
     #
     # `NVM_NODEJS_ORG_MIRROR` is exported into the subshell so the
-    # install fetches Node binaries from the Tsinghua TUNA mirror
-    # instead of nodejs.org (which is slow or blocked from
-    # mainland China). The whole sequence is wrapped in a single
+    # install fetches Node binaries from the Aliyun mirror
+    # (TUNA's `nodejs-release` mirror is stuck at v24.x) instead
+    # of nodejs.org (which is slow or blocked from mainland
+    # China). The whole sequence is wrapped in a single
     # `execute` so the shell state (the sourced `nvm.sh`) is
     # preserved across the chained commands.
 
