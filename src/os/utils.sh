@@ -295,7 +295,11 @@ show_spinner() {
 
         printf "%s\n" "$frameText"
 
-        sleep 0.2
+        # 0.5 s per frame keeps the output quiet for slow steps
+        # like `nvm install` (which clones a git repo) without
+        # making fast steps feel sluggish.
+
+        sleep 0.5
 
         # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
