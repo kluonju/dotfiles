@@ -29,3 +29,4 @@ reload_local_shell_configs
 ./shell_tools.sh
 ./tex.sh
 ./intel_oneapi.sh
+./rust.sh

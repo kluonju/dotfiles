@@ -11,6 +11,16 @@ print_in_purple "\n   Miscellaneous\n\n"
 apt_install "VLC"       "vlc"     "--skip-update"
 apt_install "Xarchiver" "xarchiver" "--skip-update"
 
+# Graphics applications.
+#
+# `blender`  — 3D modelling / animation / rendering
+# `gimp`     — raster image editor (Photoshop alternative)
+# `inkscape` — vector graphics editor (Illustrator alternative)
+
+apt_install "Blender"   "blender"   "--skip-update"
+apt_install "GIMP"      "gimp"      "--skip-update"
+apt_install "Inkscape"  "inkscape"  "--skip-update"
+
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 # Chinese input method (Fcitx5 + Chinese addons).
